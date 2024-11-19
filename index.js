@@ -3,13 +3,14 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, Collection } = require('mongodb');
 require('dotenv').config()
 const app = express()
+const jwt = require('jsonwebtoken')
 const port = process.env.port || 3000;
 
 // Middleware 
-app.use(cors({ 
-    origin:["http://localhost:5173" ,"http://localhost:3000"],
-     credentials: true,
-  }))
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+}))
 app.use(express.json())
 
 
@@ -29,23 +30,37 @@ const client = new MongoClient(url, {
 
 const dbConnect = async () => {
     try {
-         
+
         // console.log('Database use is Connect');
 
-        const Db_gadgetShop = client.db('GadgetShop').collection('user');
+        const Db_gadgetShop_User = client.db('GadgetShop').collection('user');
+
+
+        app.post('/jwt', async (req, res) => {
+            const userEmail = req.body;
+            console.log('Hit', userEmail, process.env.Access_Token);
+            const token = jwt.sign(userEmail, process.env.Access_Token, { expiresIn: '1h' })
+            res.send({token});
+        })
+
 
         app.post('/user', async (req, res) => {
-             const user = req.body;
-             console.log(user);
-            const result = await Db_gadgetShop.insertOne(user);
+            const user = req.body;
+            const query = { email: user.email }
+            existingUser = await Db_gadgetShop_User.findOne(query)
+            if (existingUser) {
+                return res.send({ message: "User Exist" });
+            }
+            user.wishlist = [];
+            const result = await Db_gadgetShop_User.insertOne(user);
             res.status(200).send(result);
         })
         app.get('/', (req, res) => {
             res.send('Hello World!')
         })
-        
 
-        // await client.connect();
+
+        await client.connect();
 
     } catch (error) {
         console.log(error.name, error.message)
