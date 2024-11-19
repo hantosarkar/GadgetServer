@@ -34,13 +34,14 @@ const dbConnect = async () => {
         // console.log('Database use is Connect');
 
         const Db_gadgetShop_User = client.db('GadgetShop').collection('user');
+        const Db_gadgetShop_Product = client.db('GadgetShop').collection('Product');
 
 
         app.post('/jwt', async (req, res) => {
             const userEmail = req.body;
             console.log('Hit', userEmail, process.env.Access_Token);
             const token = jwt.sign(userEmail, process.env.Access_Token, { expiresIn: '1h' })
-            res.send({token});
+            res.send({ token });
         })
 
 
@@ -55,6 +56,34 @@ const dbConnect = async () => {
             const result = await Db_gadgetShop_User.insertOne(user);
             res.status(200).send(result);
         })
+
+        app.get('/Product', async (req, res) => {
+
+
+            const { Category, Brand, Short } = req.query;
+
+            const query = {};
+            let sort ;
+
+            if (Category) {
+                query.Category = { $regex: Category, $options: "i" }
+            }
+            if (Brand) {
+                query.Brand = { $regex: Brand, $options: "i" }
+            }
+            if (Short) {
+                sort = Short === 'DESC' ? -1 : 1;
+            } else {
+                sort = { _id: 1 };
+            }
+
+            const Product = await Db_gadgetShop_Product.find(query).sort( {price : sort}).toArray();
+            res.send(Product)
+
+        })
+
+
+
         app.get('/', (req, res) => {
             res.send('Hello World!')
         })
