@@ -6,7 +6,10 @@ const app = express()
 const port = process.env.port || 3000;
 
 // Middleware 
-app.use(cors());
+app.use(cors({ 
+    origin:["http://localhost:5173" ,"http://localhost:3000"],
+     credentials: true,
+  }))
 app.use(express.json())
 
 
@@ -21,21 +24,28 @@ const client = new MongoClient(url, {
     }
 });
 
-const Db_gadgetShop = client.db('GadgetShop').collection('user');
+
 
 
 const dbConnect = async () => {
     try {
-        await client.connect();
-        console.log('Database use is Connect');
+         
+        // console.log('Database use is Connect');
+
+        const Db_gadgetShop = client.db('GadgetShop').collection('user');
 
         app.post('/user', async (req, res) => {
-            const user = req.body
-            console.log(user);
+             const user = req.body;
+             console.log(user);
             const result = await Db_gadgetShop.insertOne(user);
             res.status(200).send(result);
         })
+        app.get('/', (req, res) => {
+            res.send('Hello World!')
+        })
+        
 
+        // await client.connect();
 
     } catch (error) {
         console.log(error.name, error.message)
@@ -45,9 +55,6 @@ const dbConnect = async () => {
 dbConnect();
 
 //API
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
 
 
 
