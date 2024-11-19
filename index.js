@@ -59,26 +59,34 @@ const dbConnect = async () => {
 
         app.get('/Product', async (req, res) => {
 
-
             const { Category, Brand, Short } = req.query;
-
             const query = {};
-            let sort ;
+            let sort;
 
             if (Category) {
                 query.Category = { $regex: Category, $options: "i" }
+ 
             }
             if (Brand) {
                 query.Brand = { $regex: Brand, $options: "i" }
+                
             }
             if (Short) {
-                sort = Short === 'DESC' ? -1 : 1;
-            } else {
-                sort = { _id: 1 };
-            }
+                sort = Short === 'DESC' ? -1 : 1 ;
+                
+            } 
 
-            const Product = await Db_gadgetShop_Product.find(query).sort( {price : sort}).toArray();
-            res.send(Product)
+
+
+            const ProductInfo = await Db_gadgetShop_Product.find({}, { projection: { category: 1, brand: 1 } }).toArray();
+
+
+            const allCategory = [...new Set(ProductInfo.map(p => p.category))]
+
+            const allBrand = [...new Set(ProductInfo.map(p => p.brand))]
+
+            const Product = await Db_gadgetShop_Product.find(query).sort({ price: sort }).toArray();
+            res.send({ Product, allCategory, allBrand })
 
         })
 
