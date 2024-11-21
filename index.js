@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors');
-const { MongoClient, ServerApiVersion, Collection } = require('mongodb');
+const { MongoClient, ServerApiVersion, Collection, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
 const jwt = require('jsonwebtoken')
@@ -69,7 +69,7 @@ const dbConnect = async () => {
             if (search) {
                 query.category = { $regex: search, $options: "i" }
             }
-            
+
             if (Brand) {
                 query.brand = { $regex: Brand, $options: "i" }
 
@@ -79,11 +79,7 @@ const dbConnect = async () => {
 
             }
 
-
-
             const ProductInfo = await Db_gadgetShop_Product.find({}, { projection: { category: 1, brand: 1 } }).toArray();
-
-
             const allCategory = [...new Set(ProductInfo.map(p => p.category))]
 
             const allBrand = [...new Set(ProductInfo.map(p => p.brand))]
@@ -93,6 +89,12 @@ const dbConnect = async () => {
 
         })
 
+        app.get('/Product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await Db_gadgetShop_Product.findOne(query);
+            res.send(result);
+        })
 
 
         app.get('/', (req, res) => {
