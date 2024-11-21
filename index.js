@@ -39,7 +39,6 @@ const dbConnect = async () => {
 
         app.post('/jwt', async (req, res) => {
             const userEmail = req.body;
-            console.log('Hit', userEmail, process.env.Access_Token);
             const token = jwt.sign(userEmail, process.env.Access_Token, { expiresIn: '1h' })
             res.send({ token });
         })
@@ -59,22 +58,26 @@ const dbConnect = async () => {
 
         app.get('/Product', async (req, res) => {
 
-            const { Category, Brand, Short } = req.query;
+            const { Category, Brand, Short, search } = req.query;
             const query = {};
             let sort;
 
             if (Category) {
-                query.Category = { $regex: Category, $options: "i" }
- 
+                query.category = { $regex: Category, $options: "i" }
+
             }
+            if (search) {
+                query.category = { $regex: search, $options: "i" }
+            }
+            
             if (Brand) {
-                query.Brand = { $regex: Brand, $options: "i" }
-                
+                query.brand = { $regex: Brand, $options: "i" }
+
             }
             if (Short) {
-                sort = Short === 'DESC' ? -1 : 1 ;
-                
-            } 
+                sort = Short === 'DESC' ? -1 : 1;
+
+            }
 
 
 
