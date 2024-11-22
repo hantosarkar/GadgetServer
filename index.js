@@ -8,7 +8,7 @@ const port = process.env.port || 3000;
 
 // Middleware 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:3000", "https://gadget-shop-fyu6.vercel.app"],
     credentials: true,
 }))
 app.use(express.json())
@@ -47,7 +47,7 @@ const dbConnect = async () => {
             const email = req.params?.user;
             if (email) {
                 const query = { email: email }
-                const result = await Db_gadgetShop_User.findOne(query, { projection: { role: 1 , wishlist : 1 } });
+                const result = await Db_gadgetShop_User.findOne(query, { projection: { role: 1, wishlist: 1 } });
                 res.send(result);
             } else {
                 res.send({ message: "Login First" });
@@ -109,7 +109,7 @@ const dbConnect = async () => {
         })
         app.patch('/wishlist', async (req, res) => {
             const { id, user } = req.body;
-            const query = { email:user?.email}
+            const query = { email: user?.email }
             const result = await Db_gadgetShop_User.updateOne(
                 query,
                 { $addToSet: { wishlist: id } }
